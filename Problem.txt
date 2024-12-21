@@ -1,0 +1,1 @@
+Modify the LinkedList1 class presented in this chapter by adding sort() and reverse() methods. The reverse method reverses the order of the elements in the list, and the sort method rearranges the elements in the list so they are sorted in alphabetical order. Do not use recursion to implement either of these operations.
