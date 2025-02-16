@@ -1,165 +1,132 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Scanner;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
-
-public class Main extends Application
-{
+public class Main extends JFrame {
     private SortLinkedList ll;
-    private TextArea  listView;  // Used to view the current contents of the list
-    private TextField cmdTextField;
-    private TextField resultTextField;
-    private TextArea availableCmdsTextArea;
+    private JTextArea listView;  // Used to view the current contents of the list
+    private JTextField cmdTextField;
+    private JTextField resultTextField;
+    private JTextArea availableCmdsTextArea;
 
     // Help 
-    String [ ] availableCmds = 
-                 {
-                  "add index stringElement",
-                  "add stringElement",
-                  "remove stringElement",
-                  "remove index",
-                  "sort",
-                  "reverse",
-                  "isempty"
-                  };
+    String[] availableCmds = {
+        "add index stringElement",
+        "add stringElement",
+        "remove stringElement",
+        "remove index",
+        "sort",
+        "reverse",
+        "isempty"
+    };
 
-    @Override
-    public void start(Stage stage) throws Exception 
-    {
-       ll = new SortLinkedList(); 
-       listView = new TextArea();      
-       cmdTextField = new TextField();
-       resultTextField = new TextField();
-       availableCmdsTextArea = new TextArea();
+    public Main() {
+        ll = new SortLinkedList();
+        listView = new JTextArea(10, 30);
+        cmdTextField = new JTextField(20);
+        resultTextField = new JTextField(20);
+        availableCmdsTextArea = new JTextArea(5, 30);
 
-       listView.setEditable(false);
-       availableCmdsTextArea.setEditable(false);
-       resultTextField.setEditable(false);
+        listView.setEditable(false);
+        availableCmdsTextArea.setEditable(false);
+        resultTextField.setEditable(false);
 
-       // Build the UI
-       VBox outerVBox = new VBox(10);
-       outerVBox.setPadding(new Insets(10));
-       outerVBox.setAlignment(Pos.CENTER);
+        // Build the UI
+        setLayout(new BorderLayout());
 
-       // Command result controls
-       HBox cmdResultPane = new HBox(10);
-       cmdResultPane.getChildren().addAll(new Label("Command Result"), resultTextField);
+        // Command result controls
+        JPanel cmdResultPane = new JPanel();
+        cmdResultPane.add(new JLabel("Command Result:"));
+        cmdResultPane.add(resultTextField);
 
-       // Enter command controls
-       HBox enterCmdPane = new HBox(10);
-       enterCmdPane.getChildren().addAll(new Label("Enter Command"), cmdTextField);
+        // Enter command controls
+        JPanel enterCmdPane = new JPanel();
+        enterCmdPane.add(new JLabel("Enter Command:"));
+        enterCmdPane.add(cmdTextField);
 
-       // Label for list view TextArea
-       HBox listViewHBox = new HBox();
-       Label listViewLabel = new Label("List View:");
-       listViewHBox.getChildren().add(listViewLabel);
+        // Label for list view TextArea
+        JPanel listViewPane = new JPanel();
+        listViewPane.add(new JLabel("List View:"));
 
-       // Label for available commands TextArea
-       HBox availableCmdsHBox = new HBox();
-       Label availableCmdsLabel = new Label("Available Commands:");
-       availableCmdsHBox.getChildren().add(availableCmdsLabel);
+        // Label for available commands TextArea
+        JPanel availableCmdsPane = new JPanel();
+        availableCmdsPane.add(new JLabel("Available Commands:"));
 
-       // Add everything to the outer VBox
-       outerVBox.getChildren().addAll(
-                                      availableCmdsHBox,
-                                      availableCmdsTextArea,               
-                                      cmdResultPane, 
-                                      listViewHBox,
-                                      listView,
-                                      enterCmdPane                                      
-                                     );
-       // Put list of available commands in appropriate text area
-       for (String s : availableCmds)
-       {
-           availableCmdsTextArea.appendText(s + "\n");
-       }
+        // Add everything to the main frame
+        add(availableCmdsPane, BorderLayout.NORTH);
+        add(new JScrollPane(availableCmdsTextArea), BorderLayout.CENTER);
+        add(cmdResultPane, BorderLayout.SOUTH);
+        add(listViewPane, BorderLayout.WEST);
+        add(new JScrollPane(listView), BorderLayout.EAST);
+        add(enterCmdPane, BorderLayout.SOUTH);
 
-       // Usual Scene and Stage stuff
-       Scene scene = new Scene(outerVBox);
-       stage.setScene(scene);
-       stage.setTitle("Java FX Sort Reverse Linked List Demo");
-       stage.show();       
+        // Put list of available commands in appropriate text area
+        for (String s : availableCmds) {
+            availableCmdsTextArea.append(s + "\n");
+        }
 
-       // Add Event Handler for cmd text field
-       cmdTextField.setOnAction(new CmdTextListener());
+        // Usual JFrame stuff
+        setTitle("Swing Sort Reverse Linked List Demo");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+        // Add ActionListener for cmd text field
+        cmdTextField.addActionListener(new CmdTextListener());
     }
 
-    public static void main(String [] args)
-    {
-        launch(args);
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(Main::new);
     }
 
-     /**
-       Private inner class that responds to commands that
-       the user types into the command entry text field.     
-    */
-
-    private class CmdTextListener  implements EventHandler<ActionEvent>
-    {
+    /**
+     * Private inner class that responds to commands that
+     * the user types into the command entry text field.
+     */
+    private class CmdTextListener implements ActionListener {
         @Override
-        public void handle(ActionEvent evt)
-        {
+        public void actionPerformed(ActionEvent evt) {
             String cmdText = cmdTextField.getText();
             Scanner sc = new Scanner(cmdText);
             String cmd = sc.next();
-            if (cmd.equalsIgnoreCase("add"))
-            {
-                if (sc.hasNextInt())
-                {
+            if (cmd.equalsIgnoreCase("add")) {
+                if (sc.hasNextInt()) {
                     int index = sc.nextInt();
                     String element = sc.next();
-                    ll.add(index, element);                
-                }
-                else
-                {
+                    ll.add(index, element);
+                } else {
                     String element = sc.next();
-                    ll.add(element);                
+                    ll.add(element);
                 }
                 listView.setText(ll.toString());
-
                 return;
-            } 
-            if (cmd.equalsIgnoreCase("remove"))
-            {
-                if (sc.hasNextInt())
-                {
+            }
+            if (cmd.equalsIgnoreCase("remove")) {
+                if (sc.hasNextInt()) {
                     int index = sc.nextInt();
                     String res = ll.remove(index);
-                    resultTextField.setText(String.valueOf(res));              
-                }
-                else
-                {
+                    resultTextField.setText(String.valueOf(res));
+                } else {
                     String element = sc.next();
                     boolean res = ll.remove(element);
                     resultTextField.setText(String.valueOf(res));
                 }
                 listView.setText(ll.toString());
-
                 return;
-            } 
-            if (cmd.equalsIgnoreCase("isempty"))
-            {
+            }
+            if (cmd.equalsIgnoreCase("isempty")) {
                 resultTextField.setText(String.valueOf(ll.isEmpty()));
                 return;
             }
-            if (cmd.equalsIgnoreCase("sort"))
-            {
+            if (cmd.equalsIgnoreCase("sort")) {
                 ll.sort();
                 listView.setText(ll.toString());
                 return;
             }
-            if (cmd.equalsIgnoreCase("reverse"))
-            {
+            if (cmd.equalsIgnoreCase("reverse")) {
                 ll.reverse();
                 listView.setText(ll.toString());
                 return;
